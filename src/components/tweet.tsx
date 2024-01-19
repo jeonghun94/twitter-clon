@@ -1,8 +1,9 @@
 import { styled } from "styled-components";
 import { ITweet } from "./timeline";
 import { auth, db, storage } from "../firebase";
-import { deleteDoc, doc } from "firebase/firestore";
+import { deleteDoc, doc, updateDoc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
+import { useState } from "react";
 
 const Wrapper = styled.div`
   display: grid;
@@ -34,8 +35,13 @@ const Payload = styled.p`
   font-size: 18px;
 `;
 
-const DeleteButton = styled.button`
-  background-color: tomato;
+const ButtonWrapper = styled.div`
+  display: flex;
+  margin-top: 10px;
+  gap: 10px;
+`;
+
+const Button = styled.button`
   color: white;
   font-weight: 600;
   border: 0;
@@ -44,6 +50,14 @@ const DeleteButton = styled.button`
   text-transform: uppercase;
   border-radius: 5px;
   cursor: pointer;
+`;
+
+const DeleteButton = styled(Button)`
+  background-color: tomato;
+`;
+
+const EditButton = styled(Button)`
+  background-color: #3498db;
 `;
 
 export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
@@ -59,17 +73,58 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
       }
     } catch (e) {
       console.log(e);
-    } finally {
-      //
     }
   };
+
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedTweet, setEditedTweet] = useState(tweet);
+
+  const activateEditMode = () => {
+    setIsEditing(true);
+  };
+
+  const saveEditedTweet = async () => {
+    try {
+      await updateDoc(doc(db, "tweets", id), {
+        tweet: editedTweet,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Error updating tweet:", error);
+    }
+  };
+
+  const cancelEdit = () => {
+    setEditedTweet(tweet);
+    setIsEditing(false);
+  };
+
   return (
     <Wrapper>
       <Column>
         <Username>{username}</Username>
-        <Payload>{tweet}</Payload>
+        {isEditing ? (
+          <textarea
+            value={editedTweet}
+            onChange={(e) => setEditedTweet(e.target.value)}
+          />
+        ) : (
+          <Payload>{tweet}</Payload>
+        )}
         {user?.uid === userId ? (
-          <DeleteButton onClick={onDelete}>Delete</DeleteButton>
+          <>
+            {isEditing ? (
+              <ButtonWrapper>
+                <EditButton onClick={saveEditedTweet}>Save</EditButton>
+                <DeleteButton onClick={cancelEdit}>Cancel</DeleteButton>
+              </ButtonWrapper>
+            ) : (
+              <ButtonWrapper>
+                <EditButton onClick={activateEditMode}>Edit</EditButton>
+                <DeleteButton onClick={onDelete}>Delete</DeleteButton>
+              </ButtonWrapper>
+            )}
+          </>
         ) : null}
       </Column>
       <Column>{photo ? <Photo src={photo} /> : null}</Column>
