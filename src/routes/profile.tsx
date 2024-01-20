@@ -13,6 +13,8 @@ import {
 } from "firebase/firestore";
 import { ITweet } from "../components/timeline";
 import Tweet from "../components/tweet";
+import EditProfile from "../components/editProfile";
+import { Link } from "react-router-dom";
 
 const Wrapper = styled.div`
   display: flex;
@@ -22,6 +24,7 @@ const Wrapper = styled.div`
 `;
 const AvatarUpload = styled.label`
   width: 80px;
+  tes
   overflow: hidden;
   height: 80px;
   border-radius: 50%;
@@ -51,7 +54,14 @@ const Tweets = styled.div`
   flex-direction: column;
   gap: 10px;
 `;
-
+const EditProfileButton = styled(Link)`
+  background-color: #1d9bf0;
+  color: white;
+  text-decoration: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+`;
 export default function Profile() {
   const user = auth.currentUser;
   const [avatar, setAvatar] = useState(user?.photoURL);
@@ -117,6 +127,7 @@ export default function Profile() {
         accept="image/*"
       />
       <Name>{user?.displayName ?? "Anonymous"}</Name>
+      <EditProfileButton to="/edit-profile">Edit Profile</EditProfileButton>
       <Tweets>
         {tweets.map((tweet) => (
           <Tweet key={tweet.id} {...tweet} />
