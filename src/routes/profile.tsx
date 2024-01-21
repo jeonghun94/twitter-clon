@@ -13,7 +13,7 @@ import {
 } from "firebase/firestore";
 import { ITweet } from "../components/timeline";
 import Tweet from "../components/tweet";
-import EditProfile from "../components/editProfile";
+// import EditProfile from "../components/editProfile";
 import { Link } from "react-router-dom";
 
 const Wrapper = styled.div`
